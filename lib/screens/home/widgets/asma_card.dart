@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tadabbur_app/screens/dzikir/dzikir_screen.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../data/asma_data.dart';
 import '../../detail/detail_screen.dart';
 import 'package:tadabbur_app/models/asma_model.dart';
 

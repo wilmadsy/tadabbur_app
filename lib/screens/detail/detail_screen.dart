@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tadabbur_app/core/theme/app_colors.dart';
 import 'package:tadabbur_app/models/asma_model.dart';
+import 'package:tadabbur_app/screens/dzikir/dzikir_screen.dart';
 
 class DetailScreen extends StatelessWidget {
   final AsmaModel item;
@@ -185,7 +186,110 @@ class DetailScreen extends StatelessWidget {
                   )
                 ],
               ),
-            )
+            ),
+
+            SizedBox(height: 8),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: () {
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    },
+                    child: Container(
+                      height: 70,
+                      width: double.infinity,
+
+                      decoration: BoxDecoration(
+                        color: AppColors.cardbackground,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border(
+                          top: BorderSide(color: AppColors.gold, width: 1),
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "beranda",
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              "kembali ke home",
+                              style: TextStyle(
+                                color: AppColors.text.withOpacity(.7),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(width: 16),
+
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: () {
+                      Navigator.push(
+                        context, 
+                        MaterialPageRoute(
+                          builder: (_) => DzikirScreen(
+                            item: item,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 70,
+                      width: double.infinity,
+
+                      decoration: BoxDecoration(
+                        color: AppColors.cardbackground,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border(
+                          top: BorderSide(color: AppColors.gold, width: 1),
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Dzikir",
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              "pergi ke hal dzikir",
+                              style: TextStyle(
+                                color: AppColors.text.withOpacity(.7),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

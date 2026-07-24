@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tadabbur_app/core/theme/app_colors.dart';
 import 'package:tadabbur_app/models/asma_model.dart';
 import 'package:tadabbur_app/providers/dzikir_provider.dart';
+import 'package:tadabbur_app/providers/sound_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:tadabbur_app/providers/audio_player_provider.dart';
+import 'package:tadabbur_app/providers/vibration_provider.dart';
+import 'package:vibration/vibration.dart';
 
 class DzikirScreen extends ConsumerWidget {
   const DzikirScreen({super.key, required this.item});
@@ -12,6 +17,7 @@ class DzikirScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final countMap = ref.watch(dzikirProvider);
+    final player = ref.read(AudioPlayerProvider);
     final count = countMap[item.id] ?? 0;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -71,21 +77,57 @@ class DzikirScreen extends ConsumerWidget {
 
             SizedBox(height: 15),
 
-            Text(
-              "target: 100",
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.text,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                onPressed: () {
+                  ref.read(vibrationProvider.notifier).toggle();
+                },
+                icon: Icon(
+                  ref.watch(vibrationProvider)
+                      ? Icons.vibration
+                      : Icons.phone_android_outlined,
+                  color: AppColors.gold,
+                ),
               ),
+
+                IconButton(
+                  onPressed: () {
+                    ref.read(soundProvider.notifier).toggle();
+                  },
+                  icon: Icon(
+                    ref.watch(soundProvider)
+                        ? Icons.volume_up
+                        : Icons.volume_off,
+                    color: AppColors.gold,
+                  ),
+                ),
+
+              ],
             ),
 
-            SizedBox(height: 15),
-
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 ref.read(dzikirProvider.notifier).increment(item.id);
+
+                if (ref.read(soundProvider)) {
+                  await player.play(
+                    AssetSource("audio/click.mp3")
+                  );
+                }
+
+                final hasVibrator = await Vibration.hasVibrator();
+
+                print(hasVibrator);
+
+
+                // Getaran
+                if (ref.read(vibrationProvider)) {
+                  if (await Vibration.hasVibrator() ?? false) {
+                    Vibration.vibrate(duration: 100);
+                  }
+                }
               },
 
               child: Image.asset(
@@ -97,77 +139,98 @@ class DzikirScreen extends ConsumerWidget {
 
             SizedBox(height: 15),
 
-            GestureDetector(
-              onTap: () {
-                ref.read(dzikirProvider.notifier).reset(item.id);
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: () {
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    },
+                    child: Container(
+                      height: 70,
+                      width: double.infinity,
 
-              child: Container(
-                height: 70,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF102548),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardbackground,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border(
+                          top: BorderSide(color: AppColors.gold, width: 1),
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "beranda",
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              "kembali ke home",
+                              style: TextStyle(
+                                color: AppColors.text.withOpacity(.7),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-                child: Material(
-                  color: Colors.transparent,
+
+                SizedBox(width: 16),
+
+                Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(18),
                     onTap: () {
                       ref.read(dzikirProvider.notifier).reset(item.id);
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.restart_alt_rounded,
-                            color: AppColors.gold,
-                            size: 34,
-                          ),
+                    child: Container(
+                      height: 70,
+                      width: double.infinity,
 
-                          const SizedBox(width: 14),
-
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Reset",
-                                  style: TextStyle(
-                                    color: AppColors.text,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                Text(
-                                  "Ulangi hitungan",
-                                  style: TextStyle(
-                                    color: AppColors.text.withOpacity(.7),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
+                      decoration: BoxDecoration(
+                        color: AppColors.cardbackground,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border(
+                          top: BorderSide(color: AppColors.gold, width: 1),
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Reset",
+                              style: TextStyle(
+                                color: AppColors.text,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+
+                            Text(
+                              "Ulangi hitungan",
+                              style: TextStyle(
+                                color: AppColors.text.withOpacity(.7),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              )
+              ],
             ),
           ],
         ),
