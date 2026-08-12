@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const background = Color(0xFF0a192F);
-  static const cardbackground = Color(0xFF1B2A41);
+  static const background = Color.fromARGB(255, 1, 15, 36);
+  static const cardbackground = Color.fromARGB(255, 8, 23, 46);
   static const gold = Color(0xFFD4AF37);
   static const text = Color(0xFFBFC7D5);
 }

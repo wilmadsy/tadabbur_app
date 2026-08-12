@@ -1,23 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tadabbur_app/screens/detail/detail_screen.dart';
 import 'package:tadabbur_app/screens/home/widgets/asma_card.dart';
+import '../../providers/daily_asma_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/asma_data.dart';
+import 'widgets/progress_card.dart';
+import 'widgets/daily_card.dart';
+import 'widgets/search_bar.dart';
+import '../step/step_tadabbur.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
+  String search = "";
+
   @override
   Widget build(BuildContext context) {
+    final VoidCallback? onTap;
+    final today = ref.watch(dailyAsmaProvider);
+    final filteredList = asmaList.where((item) {
+      return item.arabic.toLowerCase().contains(search.toLowerCase()) ||
+          item.latin.toLowerCase().contains(search.toLowerCase()) ||
+          item.meaning.toLowerCase().contains(search.toLowerCase());
+    }).toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
           children: [
+            Container(
+              margin: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Assalamu'alaikum",
+                    textAlign: TextAlign.start,
+                    style: TextStyle(color: AppColors.gold, fontSize: 15),
+                  ),
+
+                  SizedBox(height: 8),
+
+                  Text(
+                    "Mulai hari ini dengan\nmengingat nama-nama Allah ",
+                    textAlign: TextAlign.start,
+                    style: TextStyle(color: AppColors.text, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+
+            // dailycard
+            DailyCard(
+              today: today,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailScreen(
+                      item: today
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            // progresscard
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const StepTadabbur(),
+                  ),
+                );
+              },
+              child: const ProgressCard(),
+            ),
+
+            // search bar
+            SearchBarWidget(
+              onChanged: (value) {
+                setState(() {
+                  search = value;
+                });
+              },
+            ),
+
+            //asma card
             Directionality(
               textDirection: TextDirection.rtl,
               child: GridView.builder(
@@ -29,107 +106,10 @@ class _HomePageState extends State<HomePage> {
                   crossAxisSpacing: 0.1,
                 ),
 
-                itemCount: asmaList.length,
+                itemCount: filteredList.length,
                 itemBuilder: (context, index) {
-                  return AsmaCard(
-                    item: asmaList[index],
-                  );
+                  return AsmaCard(item: filteredList[index]);
                 },
-                // itemBuilder: (context, index) {
-                //   final item = asmaList[index];
-
-                //   return Container(
-
-                //     child: Container(
-                //       margin: const EdgeInsets.all(6),
-                //       decoration: BoxDecoration(
-                //         color: AppColors.cardbackground,
-                //         borderRadius: BorderRadius.circular(16),
-                //         border: Border.all(
-                //           color: AppColors.gold.withOpacity(0.6),
-                //           width: 0.4,
-                //         ),
-                //       ),
-                //       child: Column(
-
-                //         children: [
-                //           Expanded(
-                //             flex: 3,
-                //             child: InkWell(
-                //               onTap: () {
-                //                 Navigator.push(
-                //                   context,
-                //                   MaterialPageRoute(
-                //                     builder: (context) => DetailScreen(item: item,)
-                //                   ),
-                //                 );
-                //               },
-                //               child: Column(
-                //                 mainAxisAlignment: MainAxisAlignment.center,
-                //                 children: [
-                //                   Text(
-                //                     item.arabic,
-                //                     textAlign: TextAlign.center,
-                //                     style: TextStyle(
-                //                       color: AppColors.gold,
-                //                       fontSize: item.arabic == "ذُوالْجَلاَلِ وَالإكْرَام" ? 16: 28,
-                //                       fontFamily: 'Amiri',
-                //                     ),
-                //                   ),
-
-                //                   SizedBox(height: 2),
-
-                //                   Text(
-                //                     item.latin,
-                //                     textAlign: TextAlign.center,
-                //                     style: TextStyle(
-                //                       color: AppColors.text,
-                //                       fontSize: 11,
-                //                       fontWeight: FontWeight.bold,
-                //                     ),
-                //                   ),
-                //                 ],
-                //               ),
-                //             ),
-                //           ),
-
-                //           Expanded(
-
-                //             flex: 1,
-                //             child: InkWell(
-                //               onTap: () {
-
-                //               },
-                //               child: Container(
-                //                 width: double.infinity,
-
-                //                 decoration: BoxDecoration(
-                //                   border: Border(
-                //                     top: BorderSide(
-                //                       color: AppColors.gold.withOpacity(0.5),
-                //                       width: 0.5,
-                //                     ),
-                //                   ),
-                //                 ),
-
-                //                 child: Center(
-                //                   child: Text(
-                //                     "📿 Dzikir",
-                //                     style: TextStyle(
-                //                       color: AppColors.gold,
-                //                       fontSize: 11,
-                //                       fontWeight: FontWeight.w600,
-                //                     ),
-                //                   ),
-                //                 ),
-                //               ),
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   );
-                // },
               ),
             ),
           ],

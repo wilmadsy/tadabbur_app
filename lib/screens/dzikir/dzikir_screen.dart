@@ -8,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:tadabbur_app/providers/audio_player_provider.dart';
 import 'package:tadabbur_app/providers/vibration_provider.dart';
 import 'package:vibration/vibration.dart';
+import '../../repository/dzikir_repository.dart';
 
 class DzikirScreen extends ConsumerWidget {
   const DzikirScreen({super.key, required this.item});
@@ -19,6 +20,9 @@ class DzikirScreen extends ConsumerWidget {
     final countMap = ref.watch(dzikirProvider);
     final player = ref.read(AudioPlayerProvider);
     final count = countMap[item.id] ?? 0;
+    final repository = DzikirRepository();
+    final todayDzikir = repository.getTodayDzikir();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -81,16 +85,16 @@ class DzikirScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                onPressed: () {
-                  ref.read(vibrationProvider.notifier).toggle();
-                },
-                icon: Icon(
-                  ref.watch(vibrationProvider)
-                      ? Icons.vibration
-                      : Icons.phone_android_outlined,
-                  color: AppColors.gold,
+                  onPressed: () {
+                    ref.read(vibrationProvider.notifier).toggle();
+                  },
+                  icon: Icon(
+                    ref.watch(vibrationProvider)
+                        ? Icons.vibration
+                        : Icons.phone_android_outlined,
+                    color: AppColors.gold,
+                  ),
                 ),
-              ),
 
                 IconButton(
                   onPressed: () {
@@ -103,28 +107,25 @@ class DzikirScreen extends ConsumerWidget {
                     color: AppColors.gold,
                   ),
                 ),
-
               ],
             ),
 
             GestureDetector(
               onTap: () async {
                 ref.read(dzikirProvider.notifier).increment(item.id);
+                
 
                 if (ref.read(soundProvider)) {
-                  await player.play(
-                    AssetSource("audio/click.mp3")
-                  );
+                  await player.play(AssetSource("audio/click.mp3"));
                 }
 
                 final hasVibrator = await Vibration.hasVibrator();
 
                 print(hasVibrator);
 
-
                 // Getaran
                 if (ref.read(vibrationProvider)) {
-                  if (await Vibration.hasVibrator() ?? false) {
+                  if (await Vibration.hasVibrator()) {
                     Vibration.vibrate(duration: 100);
                   }
                 }
