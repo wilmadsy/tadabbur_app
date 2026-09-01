@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'screens/home/home_screen.dart';
+import 'screens/main/main_screen.dart';
 
 Future<void> main() async {
   print("MAIN DIMULAI");
@@ -22,7 +22,11 @@ Future<void> main() async {
 
   print(Hive.openBox("dzikirBox"));
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    const ProviderScope(
+      child: MyApp()
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -32,7 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: MainScreen(),
     );
   }
 }

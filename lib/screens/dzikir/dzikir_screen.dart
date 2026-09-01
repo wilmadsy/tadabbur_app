@@ -8,7 +8,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:tadabbur_app/providers/audio_player_provider.dart';
 import 'package:tadabbur_app/providers/vibration_provider.dart';
 import 'package:vibration/vibration.dart';
-import '../../repository/dzikir_repository.dart';
 
 class DzikirScreen extends ConsumerWidget {
   const DzikirScreen({super.key, required this.item});
@@ -20,9 +19,7 @@ class DzikirScreen extends ConsumerWidget {
     final countMap = ref.watch(dzikirProvider);
     final player = ref.read(AudioPlayerProvider);
     final count = countMap[item.id] ?? 0;
-    final repository = DzikirRepository();
-    final todayDzikir = repository.getTodayDzikir();
-
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(

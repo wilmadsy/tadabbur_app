@@ -22,7 +22,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final VoidCallback? onTap;
     final today = ref.watch(dailyAsmaProvider);
     final filteredList = asmaList.where((item) {
       return item.arabic.toLowerCase().contains(search.toLowerCase()) ||
