@@ -64,7 +64,7 @@ class _WiridDetailState extends State<WiridDetail> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       // =====================================================
       // APP BAR

@@ -17,7 +17,7 @@ class WiridHome extends ConsumerWidget {
         ref.watch(wiridSetelahSholatProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
         backgroundColor: AppColors.background,

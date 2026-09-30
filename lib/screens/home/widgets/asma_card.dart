@@ -4,7 +4,7 @@ import 'package:tadabbur_app/screens/dzikir/dzikir_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../detail/detail_screen.dart';
 import 'package:tadabbur_app/models/asma_model.dart';
-import '../../../providers/asma_notifier.dart';
+// import '../../../providers/asma_notifier.dart';
 
 class AsmaCard extends ConsumerWidget {
   final AsmaModel item;
@@ -76,34 +76,34 @@ class AsmaCard extends ConsumerWidget {
                     ),
                   ),
 
-                  Positioned(
-                    top: -8,
-                    right: -8,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      icon: Icon(
-                        item.favorite
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: item.favorite
-                            ? AppColors.gold
-                            : AppColors.text.withOpacity(0.5),
-                        size: 18,
-                      ),
-                      onPressed: () {
-                        ref
-                            .read(asmaNotifierProvider.notifier)
-                            .updateFavorite(
-                              item.id,
-                              !item.favorite,
-                            );
-                      },
-                    ),
-                  ),
+                  // Positioned(
+                  //   top: -8,
+                  //   right: -8,
+                  //   child: IconButton(
+                  //     padding: EdgeInsets.zero,
+                  //     constraints: const BoxConstraints(
+                  //       minWidth: 28,
+                  //       minHeight: 28,
+                  //     ),
+                  //     icon: Icon(
+                  //       item.favorite
+                  //           ? Icons.favorite
+                  //           : Icons.favorite_border,
+                  //       color: item.favorite
+                  //           ? AppColors.gold
+                  //           : AppColors.text.withOpacity(0.5),
+                  //       size: 18,
+                  //     ),
+                  //     onPressed: () {
+                  //       ref
+                  //           .read(asmaNotifierProvider.notifier)
+                  //           .updateFavorite(
+                  //             item.id,
+                  //             !item.favorite,
+                  //           );
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),

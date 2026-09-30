@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tadabbur_app/core/theme/app_colors.dart';
+// import 'package:tadabbur_app/core/theme/app_colors.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -7,7 +7,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
     );
   }
