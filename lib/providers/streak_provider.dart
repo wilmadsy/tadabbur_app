@@ -1,11 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../repository/streak_repository.dart';
+import '../core/database/app_database.dart';
 
 class StreakNotifier extends StateNotifier<int> {
   final StreakRepository repository;
 
-  StreakNotifier(this.repository)
-      : super(repository.getStreak());
+  StreakNotifier(this.repository) : super(0) {
+    _loadStreak();
+  }
+
+  Future<void> _loadStreak() async {
+    state = await repository.getStreak();
+  }
 
   Future<void> updateStreak() async {
     final now = DateTime.now();
@@ -13,7 +20,7 @@ class StreakNotifier extends StateNotifier<int> {
     final today =
         "${now.year}-${now.month}-${now.day}";
 
-    final lastDate = repository.getLastDate();
+    final lastDate = await repository.getLastDate();
 
     if (lastDate == null) {
       state = 1;
@@ -27,7 +34,13 @@ class StreakNotifier extends StateNotifier<int> {
     final old = DateTime.parse(lastDate);
 
     final diff = now
-        .difference(DateTime(old.year, old.month, old.day))
+        .difference(
+          DateTime(
+            old.year,
+            old.month,
+            old.day,
+          ),
+        )
         .inDays;
 
     if (diff == 0) {
@@ -51,6 +64,8 @@ class StreakNotifier extends StateNotifier<int> {
 final streakProvider =
     StateNotifierProvider<StreakNotifier, int>(
   (ref) => StreakNotifier(
-    StreakRepository(),
+    StreakRepository(
+      AppDatabase(),
+    ),
   ),
 );

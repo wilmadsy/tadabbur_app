@@ -1,51 +1,114 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sqflite/sqflite.dart';
+import '../core/database/app_database.dart';
 
 class DzikirRepository {
-  final Box _box = Hive.box("dzikirBox");
+  final AppDatabase database;
+
+  DzikirRepository(this.database);
 
   // =========================
   // DZIKIR PER ASMA
   // =========================
 
-  int getCount(int id) {
-    return _box.get(id, defaultValue: 0) ?? 0;
+  Future<int> getCount(int id) async {
+    final db = await database.database;
+
+    final result = await db.query(
+      'asma',
+      columns: ['count'],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (result.isEmpty) {
+      return 0;
+    }
+
+    return result.first['count'] as int;
   }
 
   Future<void> saveCount(int id, int count) async {
-    await _box.put(id, count);
+    await database.updateCount(id, count);
   }
 
-  int getTotalDzikir() {
-    int total = 0;
+  Future<int> getTotalDzikir() async {
+    final db = await database.database;
 
-    for (int id = 1; id <= 99; id++) {
-      total += getCount(id);
-    }
+    final result = await db.rawQuery(
+      'SELECT SUM(count) as total FROM asma',
+    );
 
-    return total;
+    return (result.first['total'] as int?) ?? 0;
   }
 
   Future<void> reset(int id) async {
-    await _box.put(id, 0);
+    await database.updateCount(id, 0);
   }
 
   // =========================
   // DZIKIR HARI INI
   // =========================
 
-  int getTodayDzikir() {
-    return _box.get("todayDzikir", defaultValue: 0) ?? 0;
+  Future<int> getTodayDzikir() async {
+    final db = await database.database;
+
+    final result = await db.query(
+      'app_data',
+      columns: ['value'],
+      where: 'key = ?',
+      whereArgs: ['todayDzikir'],
+    );
+
+    if (result.isEmpty) {
+      return 0;
+    }
+
+    return int.tryParse(
+          result.first['value'] as String? ?? '0',
+        ) ??
+        0;
   }
 
   Future<void> saveTodayDzikir(int count) async {
-    await _box.put("todayDzikir", count);
+    final db = await database.database;
+
+    await db.insert(
+      'app_data',
+      {
+        'key': 'todayDzikir',
+        'value': count.toString(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-  String? getLastDzikirDate() {
-    return _box.get("lastDzikirDate");
+  Future<String?> getLastDzikirDate() async {
+    final db = await database.database;
+
+    final result = await db.query(
+      'app_data',
+      columns: ['value'],
+      where: 'key = ?',
+      whereArgs: ['lastDzikirDate'],
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return result.first['value'] as String?;
   }
 
   Future<void> saveLastDzikirDate(String date) async {
-    await _box.put("lastDzikirDate", date);
+    final db = await database.database;
+
+    await db.insert(
+      'app_data',
+      {
+        'key': 'lastDzikirDate',
+        'value': date,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:tadabbur_app/core/theme/app_colors.dart';
 import 'package:tadabbur_app/models/wirid_model.dart';
-import '../../data/wirid/wirid_pagi.dart';
-import '../../data/wirid/wirid_petang.dart';
-import '../../data/wirid/wirid_setelahsholat.dart';
+import '../../providers/wirid_provider.dart';
 import 'wirid_detail.dart';
 
-class WiridHome extends StatelessWidget {
+class WiridHome extends ConsumerWidget {
   const WiridHome({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pagiAsync = ref.watch(wiridPagiProvider);
+    final petangAsync = ref.watch(wiridPetangProvider);
+    final setelahSholatAsync =
+        ref.watch(wiridSetelahSholatProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
 
@@ -19,39 +24,93 @@ class WiridHome extends StatelessWidget {
         elevation: 0,
         title: const Text(
           "Wirid",
-          style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppColors.gold,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
 
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _wiridCard(
-            context,
-            icon: Icons.wb_sunny_outlined,
-            title: "Wirid Pagi",
-            subtitle: "Dzikir dan doa untuk mengawali hari",
-            wirid: wiridPagi,
+          // =========================
+          // WIRID PAGI
+          // =========================
+          pagiAsync.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, stack) => Text(
+              'Gagal memuat Wirid Pagi',
+              style: TextStyle(
+                color: AppColors.text,
+              ),
+            ),
+            data: (wirid) {
+              return _wiridCard(
+                context,
+                icon: Icons.wb_sunny_outlined,
+                title: "Wirid Pagi",
+                subtitle:
+                    "Dzikir dan doa untuk mengawali hari",
+                wirid: wirid,
+              );
+            },
           ),
 
           const SizedBox(height: 12),
 
-          _wiridCard(
-            context,
-            icon: Icons.nightlight_outlined,
-            title: "Wirid Petang",
-            subtitle: "Dzikir dan doa untuk menutup hari",
-            wirid: wiridpetang,
+          // =========================
+          // WIRID PETANG
+          // =========================
+          petangAsync.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, stack) => Text(
+              'Gagal memuat Wirid Petang',
+              style: TextStyle(
+                color: AppColors.text,
+              ),
+            ),
+            data: (wirid) {
+              return _wiridCard(
+                context,
+                icon: Icons.nightlight_outlined,
+                title: "Wirid Petang",
+                subtitle:
+                    "Dzikir dan doa untuk menutup hari",
+                wirid: wirid,
+              );
+            },
           ),
 
           const SizedBox(height: 12),
 
-          _wiridCard(
-            context,
-            icon: Icons.mosque_outlined,
-            title: "Wirid Setelah Shalat",
-            subtitle: "Dzikir setelah menunaikan shalat",
-            wirid: wiridSetelahSholat,
+          // =========================
+          // SETELAH SHOLAT
+          // =========================
+          setelahSholatAsync.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, stack) => Text(
+              'Gagal memuat Wirid Setelah Sholat',
+              style: TextStyle(
+                color: AppColors.text,
+              ),
+            ),
+            data: (wirid) {
+              return _wiridCard(
+                context,
+                icon: Icons.mosque_outlined,
+                title: "Wirid Setelah Shalat",
+                subtitle:
+                    "Dzikir setelah menunaikan shalat",
+                wirid: wirid,
+              );
+            },
           ),
         ],
       ),
@@ -77,24 +136,30 @@ class WiridHome extends StatelessWidget {
           ),
         );
       },
-
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: AppColors.cardbackground,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.gold.withOpacity(.25)),
+          border: Border.all(
+            color: AppColors.gold.withOpacity(.25),
+          ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.gold, size: 32),
+            Icon(
+              icon,
+              color: AppColors.gold,
+              size: 32,
+            ),
 
             const SizedBox(width: 16),
 
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
@@ -110,7 +175,8 @@ class WiridHome extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: AppColors.text.withOpacity(.65),
+                      color:
+                          AppColors.text.withOpacity(.65),
                       fontSize: 13,
                     ),
                   ),
@@ -118,7 +184,10 @@ class WiridHome extends StatelessWidget {
               ),
             ),
 
-            const Icon(Icons.chevron_right, color: AppColors.gold),
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.gold,
+            ),
           ],
         ),
       ),

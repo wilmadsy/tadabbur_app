@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../models/wirid_model.dart';
+import 'reading_preferences.dart';
 
 class WiridDetail extends StatefulWidget {
   final String title;
@@ -17,27 +19,72 @@ class WiridDetail extends StatefulWidget {
 }
 
 class _WiridDetailState extends State<WiridDetail> {
-  // Menyimpan halaman yang sedang aktif.
-  // Flutter menggunakan index mulai dari 0:
-  // 0 = halaman pertama
-  // 1 = halaman kedua
-  // 2 = halaman ketiga
+
   int currentPage = 0;
+
+  // =====================================================
+  // PREFERENSI MEMBACA
+  // =====================================================
+
+  double arabicFontSize = 24;
+  double latinFontSize = 18;
+
+  bool showLatin = true;
+  bool showMeaning = true;
+
+  // =====================================================
+  // BUKA PREFERENSI
+  // =====================================================
+
+  Future<void> _openReadingPreferences() async {
+
+    final result = await Navigator.push<ReadingPreferenceResult>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReadingPreferences(
+          arabicFontSize: arabicFontSize,
+          latinFontSize: latinFontSize,
+          showLatin: showLatin,
+          showMeaning: showMeaning,
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    setState(() {
+      arabicFontSize = result.arabicFontSize;
+      latinFontSize = result.latinFontSize;
+      showLatin = result.showLatin;
+      showMeaning = result.showMeaning;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: AppColors.background,
 
-      // =========================
+      // =====================================================
       // APP BAR
-      // =========================
+      // =====================================================
+
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
 
-        // Membuat title AppBar berada di tengah.
         centerTitle: true,
+
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColors.gold,
+          ),
+        ),
 
         title: Text(
           widget.title,
@@ -47,35 +94,48 @@ class _WiridDetailState extends State<WiridDetail> {
           ),
         ),
 
-        iconTheme: const IconThemeData(
-          color: AppColors.gold,
-        ),
+        actions: [
+
+          // =================================================
+          // TOMBOL aA
+          // =================================================
+
+          IconButton(
+            tooltip: 'Preferensi membaca',
+            onPressed: _openReadingPreferences,
+            icon: const Text(
+              'aA',
+              style: TextStyle(
+                color: AppColors.gold,
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 6),
+        ],
       ),
 
-      // =========================
+      // =====================================================
       // BODY
-      // =========================
+      // =====================================================
+
       body: Column(
         children: [
-          // Expanded membuat PageView mengambil
-          // ruang yang tersedia di antara AppBar
-          // dan indikator halaman.
+
           Expanded(
             child: PageView.builder(
-              // Jumlah halaman mengikuti jumlah
-              // data WiridModel yang dikirim.
               itemCount: widget.wirid.length,
 
-              // Dipanggil setiap kali user berpindah halaman.
               onPageChanged: (index) {
                 setState(() {
                   currentPage = index;
                 });
               },
 
-              // Membuat isi setiap halaman.
               itemBuilder: (context, index) {
-                // Mengambil data berdasarkan index.
+
                 final item = widget.wirid[index];
 
                 return SingleChildScrollView(
@@ -83,9 +143,11 @@ class _WiridDetailState extends State<WiridDetail> {
 
                   child: Column(
                     children: [
-                      // =========================
-                      // JUDUL BACAAN
-                      // =========================
+
+                      // =================================================
+                      // JUDUL
+                      // =================================================
+
                       Center(
                         child: Text(
                           item.title,
@@ -100,18 +162,58 @@ class _WiridDetailState extends State<WiridDetail> {
 
                       const SizedBox(height: 24),
 
-                      // =========================
-                      // TEKS ARAB
-                      // =========================
+                      // =================================================
+                      // ARABIC
+                      // =================================================
+
                       Text(
                         item.arabic,
                         textAlign: TextAlign.right,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 24,
+                          fontSize: arabicFontSize,
                           height: 2,
+                          fontFamily: 'Amiri',
                         ),
                       ),
+
+                      // =================================================
+                      // LATIN
+                      // =================================================
+
+                      if (showLatin &&
+                          item.latin.trim().isNotEmpty) ...[
+                        const SizedBox(height: 24),
+
+                        Text(
+                          item.latin,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.gold,
+                            fontSize: latinFontSize,
+                            height: 1.6,
+                          ),
+                        ),
+                      ],
+
+                      // =================================================
+                      // TERJEMAH
+                      // =================================================
+
+                      if (showMeaning &&
+                          item.meaning.trim().isNotEmpty) ...[
+                        const SizedBox(height: 18),
+
+                        Text(
+                          item.meaning,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.text.withOpacity(.75),
+                            fontSize: 17,
+                            height: 1.6,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 );
@@ -119,13 +221,15 @@ class _WiridDetailState extends State<WiridDetail> {
             ),
           ),
 
-          // =========================
-          // INDIKATOR HALAMAN
-          // =========================
+          // =====================================================
+          // PAGE INDICATOR
+          // =====================================================
+
           Padding(
             padding: const EdgeInsets.only(
               bottom: 20,
             ),
+
             child: Text(
               '${currentPage + 1} / ${widget.wirid.length}',
               style: const TextStyle(

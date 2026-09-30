@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repository/dzikir_repository.dart';
+import '../core/database/app_database.dart';
 import 'streak_provider.dart';
 
 class DzikirNotifier extends StateNotifier<Map<int, int>> {
@@ -10,12 +11,11 @@ class DzikirNotifier extends StateNotifier<Map<int, int>> {
     _loadData();
   }
 
-  /// Ambil semua data dari Hive saat aplikasi dibuka
-  void _loadData() {
+  Future<void> _loadData() async {
     final data = <int, int>{};
 
     for (int i = 1; i <= 99; i++) {
-      data[i] = repository.getCount(i);
+      data[i] = await repository.getCount(i);
     }
 
     state = data;
@@ -35,9 +35,9 @@ class DzikirNotifier extends StateNotifier<Map<int, int>> {
     final today = DateTime.now();
     final todayString = "${today.year}-${today.month}-${today.day}";
 
-    final lastDate = repository.getLastDzikirDate();
+    final lastDate = await repository.getLastDzikirDate();
 
-    int todayDzikir = repository.getTodayDzikir();
+    int todayDzikir = await repository.getTodayDzikir();
 
     // Kalau sudah berganti hari → reset hitungan hari ini
     if (lastDate != todayString) {
@@ -69,8 +69,8 @@ class DzikirNotifier extends StateNotifier<Map<int, int>> {
     return state.values.fold(0, (sum, value) => sum + value);
   }
 
-  int getTodayDzikir() {
-    return repository.getTodayDzikir();
+  Future<int> getTodayDzikir() async {
+    return await repository.getTodayDzikir();
   }
 
   /// Berapa Asma yang sudah pernah didzikir (count > 0)
@@ -82,10 +82,48 @@ class DzikirNotifier extends StateNotifier<Map<int, int>> {
   double getProgress() {
     return getCompletedAsma() / 99;
   }
+
+  Future<void> recordTodayDzikir() async {
+    final today = DateTime.now();
+    final todayString =
+        "${today.year}-${today.month}-${today.day}";
+
+    final lastDate = await repository.getLastDzikirDate();
+
+    int todayDzikir = await repository.getTodayDzikir();
+
+    if (lastDate != todayString) {
+      todayDzikir = 0;
+    }
+
+    todayDzikir++;
+
+    await repository.saveTodayDzikir(todayDzikir);
+    await repository.saveLastDzikirDate(todayString);
+
+    print("DZIKIR HARI INI = $todayDzikir");
+
+    if (todayDzikir == 100) {
+      await ref.read(streakProvider.notifier).updateStreak();
+    }
+
+    ref.invalidate(todayDzikirProvider);
+  }
 }
 
 final dzikirProvider = StateNotifierProvider<DzikirNotifier, Map<int, int>>(
   (ref) => DzikirNotifier(
-    DzikirRepository(),
-    ref,),
+    DzikirRepository(
+      AppDatabase(),
+    ),
+    ref,
+  ),
 );
+
+final todayDzikirProvider = FutureProvider<int>((ref) async {
+  final repository = DzikirRepository(
+    AppDatabase(),
+  );
+
+  return repository.getTodayDzikir();
+});

@@ -1,42 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-
+import 'core/theme/app_colors.dart';
+import 'core/database/app_database.dart';
+import 'repository/asma_repository.dart';
 import 'screens/main/main_screen.dart';
+import 'providers/theme_provider.dart';
 
 Future<void> main() async {
   print("MAIN DIMULAI");
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  print("INIT HIVE");
+  // =========================
+  // INIT SQLITE
+  // =========================
+  final database = AppDatabase();
 
-  await Hive.initFlutter();
+  await database.initAsmaData();
+  await database.initWiridData();
 
-  print("OPEN BOX");
+  // =========================
+  // TEST REPOSITORY
+  // =========================
+  final repository = AsmaRepository(database);
 
-  await Hive.openBox("dzikirBox");
-  await Hive.openBox("appBox");
+  final asmaFromRepository = await repository.getAllAsma();
 
-  print("BOX DIBUKA");
+  print('Jumlah Asma dari Repository: ${asmaFromRepository.length}');
 
-  print(Hive.openBox("dzikirBox"));
-
-  runApp(
-    const ProviderScope(
-      child: MyApp()
-    ),
-  );
+  // =========================
+  // RUN APP
+  // =========================
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLight = ref.watch(themeProvider);
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+
+      theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: AppColors.lightBackground,
+      ),
+
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: AppColors.background,
+      ),
+
+      themeMode: isLight ? ThemeMode.light : ThemeMode.dark,
+
+      home: const MainScreen(),
     );
   }
 }
